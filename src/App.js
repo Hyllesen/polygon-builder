@@ -1,12 +1,12 @@
 import React from 'react';
 import './App.css';
-import PolygonSelector from './PolygonSelector';
+import AreaCalculator from './AreaCalculator';
 
 function App() {
   return (
     <div className="App">
-      <div className="star-wrapper">
-        <PolygonSelector onChange={(points) => console.log(points)} />
+      <div className="area-wrapper">
+        <AreaCalculator />
       </div>
     </div >
   );
