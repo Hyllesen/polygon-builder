@@ -100,7 +100,6 @@ function App() {
   const generateLines = () => {
     originalPoints.forEach((point, index) => {
       const handle = generateLine(point, originalPoints[(index + 1) % originalPoints.length], index)
-      console.log(root);
       root.insertBefore(handle, star.nextSibling)
       originalPaths.push(handle)
     })
@@ -162,8 +161,6 @@ function App() {
 
     newPoint.x = (startPoint.x + endPoint.x) / 2;
     newPoint.y = (startPoint.y + endPoint.y) / 2;
-
-    console.log(event, newPoint)
 
     star.points.insertItemBefore(newPoint, dataIndex + 1);
 
