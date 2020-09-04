@@ -28,7 +28,7 @@ const getPolygonPointsString = (points) => {
   return points.map(point => `${point.x},${point.y}`).join(' ');
 }
 
-const PolygonSelector = ({ points = dummyPoints, stroke = "#29e", strokeWidth = 20, handleColor = "#fff", onChange, viewBox = "0 0 800 800", ...svgProps }) => {
+const PolygonSelector = ({ points = dummyPoints, stroke = "#29e", strokeWidth = 20, handleColor = "#fff", onChange, width = 800, height = 800, ...svgProps }) => {
   const pointsString = getPolygonPointsString(points);
 
   let root
@@ -41,7 +41,7 @@ const PolygonSelector = ({ points = dummyPoints, stroke = "#29e", strokeWidth = 
 
   React.useEffect(() => {
     root = document.getElementById('polygon-selector')
-    star = document.getElementById('edit-star')
+    star = document.getElementById('edit-polygon')
 
     generateHandles();
 
@@ -50,6 +50,33 @@ const PolygonSelector = ({ points = dummyPoints, stroke = "#29e", strokeWidth = 
       .on('touchstart', applyTransforms)
       .on('mouseup', updateParent)
       .on('touchend', updateParent)
+
+    interact('#drag-handle')
+      .draggable({
+        onmove: function (event) {
+          const offsetX = event.dx / rootMatrix.a;
+          const offsetY = event.dy / rootMatrix.d;
+          for (let i = 0; i < star.points.numberOfItems; i++) {
+            const point = star.points.getItem(i);
+            point.x += offsetX;
+            point.y += offsetY;
+          }
+          pointHandles.forEach(point => {
+            point.x.baseVal.value += offsetX;
+            point.y.baseVal.value += offsetY;
+          })
+          originalPaths.forEach(line => {
+            line.x1.baseVal.value += offsetX
+            line.y1.baseVal.value += offsetY
+
+            line.x2.baseVal.value += offsetX
+            line.y2.baseVal.value += offsetY
+          });
+
+          event.target.x.baseVal.value += offsetX
+          event.target.y.baseVal.value += offsetY
+        }
+      })
 
     interact('.point-handle')
       .draggable({
@@ -213,7 +240,7 @@ const PolygonSelector = ({ points = dummyPoints, stroke = "#29e", strokeWidth = 
   }
 
   return (
-    <svg id="polygon-selector" viewBox={viewBox} xmlns="http://www.w3.org/2000/svg" {...svgProps}>
+    <svg id="polygon-selector" viewBox={`0 0 ${width} ${height}`} xmlns="http://www.w3.org/2000/svg" {...svgProps}>
       <defs>
         <circle id="point-handle"
           r="10" x="0" y="0"
@@ -222,13 +249,14 @@ const PolygonSelector = ({ points = dummyPoints, stroke = "#29e", strokeWidth = 
           fillOpacity="1"
           stroke={handleColor} />
       </defs>
-      <polygon id="edit-star"
+      <polygon id="edit-polygon"
         stroke={stroke}
         strokeWidth={strokeWidth}
         strokeLinejoin="round"
         fill="none"
         points={pointsString} />
-      <path d="M507.353,245.245l-83.692-78.769c-4.289-4.039-10.57-5.141-15.98-2.803c-5.409,2.337-8.911,7.666-8.911,13.558v34.462
+      <svg id="drag-handle" width="30" height="30" x={width / 2 - 15} y={height / 2 - 15} viewBox="0 0 512 512">
+        <path d="M507.353,245.245l-83.692-78.769c-4.289-4.039-10.57-5.141-15.98-2.803c-5.409,2.337-8.911,7.666-8.911,13.558v34.462
         h-98.462v-98.462h34.462c5.893,0,11.221-3.502,13.558-8.911c2.336-5.409,1.236-11.69-2.803-15.98L266.755,4.647
         C263.964,1.682,260.072,0,256,0c-4.072,0-7.964,1.682-10.755,4.647L166.476,88.34c-4.039,4.29-5.141,10.571-2.803,15.98
         c2.337,5.409,7.666,8.911,13.558,8.911h34.462v98.462h-98.462v-34.462c0-5.893-3.502-11.221-8.911-13.558
@@ -244,6 +272,7 @@ const PolygonSelector = ({ points = dummyPoints, stroke = "#29e", strokeWidth = 
         c8.157,0,14.769-6.613,14.769-14.769v-128c0-8.157-6.613-14.769-14.769-14.769h-15.049L256,36.319l44.587,47.374h-15.049
         c-8.157,0-14.769,6.613-14.769,14.769v128c0,8.157,6.613,14.769,14.769,14.769h128c8.157,0,14.769-6.613,14.769-14.769v-15.049
         L475.682,256L428.308,300.587z"/>
+      </svg>
     </svg>
   );
 }
