@@ -33,6 +33,7 @@ const PolygonSelector = ({ points = dummyPoints, stroke = "#29e", strokeWidth = 
 
   let root
   let star
+  let plusSign
   let rootMatrix
   const originalPoints = []
   const pointHandles = []
@@ -42,6 +43,8 @@ const PolygonSelector = ({ points = dummyPoints, stroke = "#29e", strokeWidth = 
   React.useEffect(() => {
     root = document.getElementById('polygon-selector')
     star = document.getElementById('edit-polygon')
+    plusSign = document.getElementById('plusSign')
+    plusSign.setAttribute('opacity', 0)
 
     generateHandles();
 
@@ -50,6 +53,7 @@ const PolygonSelector = ({ points = dummyPoints, stroke = "#29e", strokeWidth = 
       .on('touchstart', applyTransforms)
       .on('mouseup', updateParent)
       .on('touchend', updateParent)
+      .on('mouseover', hideHandle)
 
     interact('#drag-handle')
       .draggable({
@@ -116,6 +120,8 @@ const PolygonSelector = ({ points = dummyPoints, stroke = "#29e", strokeWidth = 
     interact('.line-handle')
       .on('mousedown', addNewNode)
       .on('touchstart', addNewNode)
+      .on('mouseover', showHandle)
+
 
     document.addEventListener('dragstart', (event) => {
       event.preventDefault()
@@ -171,8 +177,6 @@ const PolygonSelector = ({ points = dummyPoints, stroke = "#29e", strokeWidth = 
     handle.x2.baseVal.value = point2.x
     handle.y2.baseVal.value = point2.y
 
-    handle.strokeWidth = 20;
-    handle.strokeWidth = 20;
     handle.strokeWidth = 20;
 
     handle.setAttribute('stroke-width', 20);
@@ -239,6 +243,18 @@ const PolygonSelector = ({ points = dummyPoints, stroke = "#29e", strokeWidth = 
     onChange(originalPoints.map(point => ({ x: point.x, y: point.y })))
   }
 
+  const showHandle = (event) => {
+    event.stopPropagation();
+    const dataIndex = parseInt(event.target.attributes['data-index'].value);
+    plusSign.setAttribute('opacity', 1);
+    plusSign.setAttribute('x', (originalPaths[dataIndex].x1.baseVal.value + originalPaths[dataIndex].x2.baseVal.value) / 2 - 10);
+    plusSign.setAttribute('y', (originalPaths[dataIndex].y1.baseVal.value + originalPaths[dataIndex].y2.baseVal.value) / 2 - 10);
+  }
+
+  const hideHandle = (event) => {
+    plusSign.setAttribute('opacity', 0);
+  }
+
   return (
     <svg id="polygon-selector" viewBox={`0 0 ${width} ${height}`} xmlns="http://www.w3.org/2000/svg" {...svgProps}>
       <defs>
@@ -255,7 +271,12 @@ const PolygonSelector = ({ points = dummyPoints, stroke = "#29e", strokeWidth = 
         strokeLinejoin="round"
         fill="none"
         points={pointsString} />
-      <svg id="drag-handle" width="30" height="30" x={width / 2 - 15} y={height / 2 - 15} viewBox="0 0 512 512">
+      <svg id="plusSign" width="20" height="20" viewBox="0 0 512 512" fill={handleColor} xmlns="http://www.w3.org/2000/svg">
+        <path d="m256 512c-141.164062 0-256-114.835938-256-256s114.835938-256 256-256 256 114.835938 256 256-114.835938 256-256 256zm0-480c-123.519531 0-224 100.480469-224 224s100.480469 224 224 224 224-100.480469 224-224-100.480469-224-224-224zm0 0" />
+        <path d="m368 272h-224c-8.832031 0-16-7.167969-16-16s7.167969-16 16-16h224c8.832031 0 16 7.167969 16 16s-7.167969 16-16 16zm0 0" />
+        <path d="m256 384c-8.832031 0-16-7.167969-16-16v-224c0-8.832031 7.167969-16 16-16s16 7.167969 16 16v224c0 8.832031-7.167969 16-16 16zm0 0" />
+      </svg>
+      <svg id="drag-handle" width="30" height="30" x={width / 2 - 15} y={height / 2 - 15} viewBox="0 0 512 512" fill={handleColor}>
         <path d="M507.353,245.245l-83.692-78.769c-4.289-4.039-10.57-5.141-15.98-2.803c-5.409,2.337-8.911,7.666-8.911,13.558v34.462
         h-98.462v-98.462h34.462c5.893,0,11.221-3.502,13.558-8.911c2.336-5.409,1.236-11.69-2.803-15.98L266.755,4.647
         C263.964,1.682,260.072,0,256,0c-4.072,0-7.964,1.682-10.755,4.647L166.476,88.34c-4.039,4.29-5.141,10.571-2.803,15.98
